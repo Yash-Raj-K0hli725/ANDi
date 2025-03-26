@@ -1,5 +1,6 @@
 package com.example.andi.viewModel
 
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,7 +25,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 
-class mainModel(context: MainActivity) : ViewModel() {
+class mainModel(private val context: MainActivity) : ViewModel() {
     val repo = repo()
     private val elements = MutableLiveData<List<htmlData>>()
     val pageData: LiveData<List<htmlData>>
@@ -57,21 +58,28 @@ class mainModel(context: MainActivity) : ViewModel() {
     )
 
     init {
-        viewModelScope.launch {
-            callingWebsite()
-        }
+        initialStartUp()
     }
 
     suspend fun callingWebsite() {
-        val result = repo.gethtml()
-        if (result.isSuccessful && result.body() != null) {
-            val htmlResponse = Jsoup.parse(result.body())
-            val tables = htmlResponse.select("tbody").select("td")
-            withContext(Dispatchers.Main) {
-                elements.value = filter(tables)
+        try {
+            val result = repo.gethtml()
+            if (result.isSuccessful && result.body() != null) {
+                val htmlResponse = Jsoup.parse(result.body())
+                val tables = htmlResponse.select("tbody").select("td")
+                withContext(Dispatchers.Main) {
+                    elements.value = filter(tables)
+                }
             }
-        } else {
-            //
+        } catch (e: Exception) {
+            noConnectionsdialog()
+        }
+
+    }
+
+    fun initialStartUp(){
+        viewModelScope.launch {
+            callingWebsite()
         }
     }
 
@@ -95,5 +103,15 @@ class mainModel(context: MainActivity) : ViewModel() {
         return check.isNotEmpty()
     }
 
-
+    fun noConnectionsdialog() {
+        AlertDialog.Builder(context)
+            .setTitle("Connection Error")
+            .setMessage("Please check your Internet connections before connecting")
+            .setPositiveButton("Retry") { _, _ ->
+                initialStartUp()
+            }
+            .setNegativeButton("Close") { _, _ ->
+                context.finish()
+            }.create().show()
+    }
 }
