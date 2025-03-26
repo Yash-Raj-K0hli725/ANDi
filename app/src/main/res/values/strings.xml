@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ANDi</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="business">Business</string>
+    <string name="ecomerce">Ecomerce</string>
+    <string name="education">Education</string>
+    <string name="food">Food</string>
+    <string name="matrimony">Matrimony</string>
+    <string name="medical">Medical</string>
+</resources>
